@@ -24,7 +24,8 @@
  * @param msg The received message.
  */
 void chatterCallback(const std_msgs::msg::String::SharedPtr msg) {
-    RCLCPP_INFO(rclcpp::get_logger("listener"), "I heard: '%s'", msg->data.c_str());
+    RCLCPP_INFO(rclcpp::get_logger("listener"), "I heard: '%s'",
+                msg->data.c_str());
 }
 
 /**
