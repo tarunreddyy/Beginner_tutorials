@@ -45,9 +45,9 @@ This package is part of a series of tutorials for learning ROS 2, the Robot Oper
    source ~/ros2_ws/install/setup.bash
    ```
 
-* Echo the messages published on the `chatter` topic:
+* Run the `listener` node:
    ```bash
-   ros2 topic echo /chatter std_msgs/msg/String
+   ros2 run beginner_tutorials listener
    ```
 
 You should see messages printed to the terminal indicating that the `talker` node is publishing messages to the `chatter` topic.

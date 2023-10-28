@@ -12,12 +12,17 @@ find_package(std_msgs REQUIRED)
 
 # Declare a C++ executable
 add_executable(talker src/talker.cpp)
+add_executable(listener src/listener.cpp)
 
 # Specify libraries to link a library or executable target against
 ament_target_dependencies(talker rclcpp std_msgs)
+ament_target_dependencies(listener rclcpp std_msgs)
+
 
 # Install targets
-install(TARGETS talker
+install(TARGETS
+  talker
+  listener
   DESTINATION lib/${PROJECT_NAME}
 )
 
