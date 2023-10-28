@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     while (rclcpp::ok()) {
         // Create and publish a message
         auto msg = std_msgs::msg::String();
-        msg.data = "Hello ROS 2!";
+        msg.data = "Hello World!";
         chatter_pub->publish(msg);
 
         // Spin and sleep
