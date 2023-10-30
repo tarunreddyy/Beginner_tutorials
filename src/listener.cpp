@@ -3,8 +3,8 @@
 /**
  * @file listener.cpp
  * @author Tarun Trilokesh
- * @date 10/27/2023
- * @version 1.0
+ * @date 10/29/2023
+ * @version 2.0
  *
  * @brief Main entry point for the beginner_tutorials subscriber node.
  *
@@ -14,47 +14,61 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "beginner_tutorials/srv/change_string.hpp"
 
 /**
- * @brief Callback function to handle received messages.
- * 
- * This function is called whenever a new message is received on
- * the "chatter" topic. It simply prints the message to the console.
- * 
- * @param msg The received message.
+ * @class Talker
+ * @brief ROS2 node that publishes messages and provides a service to change the base string.
  */
-void chatterCallback(const std_msgs::msg::String::SharedPtr msg) {
-    RCLCPP_INFO(rclcpp::get_logger("listener"), "I heard: '%s'",
-                msg->data.c_str());
-}
+class Talker : public rclcpp::Node {
+ public:
+    Talker() : Node("talker"), base_string_("Hello World!") {
+        publisher_ = this->create_publisher<std_msgs::msg::String>(
+            "chatter", 10);
+        service_ = this->create_service<beginner_tutorials::srv::ChangeString>(
+            "change_string", std::bind(&Talker::handleChangeStringRequest, this,
+            std::placeholders::_1, std::placeholders::_2));
+        RCLCPP_INFO_STREAM(this->get_logger(),
+            "Talker node initialized with base string: "
+                           << base_string_);
+    }
 
-/**
- * @brief Main function to run the subscriber node.
- * 
- * Initializes the ROS 2 node and subscriber. Continuously listens for
- * messages on the "chatter" topic and calls the callback function to
- * handle them.
- * 
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int - Returns 0 on successful execution.
- */
+    void publishMessage() {
+        auto message = std_msgs::msg::String();
+        message.data = base_string_;
+        RCLCPP_DEBUG(this->get_logger(), "Publishing: '%s'",
+            message.data.c_str());
+        publisher_->publish(message);
+    }
+
+ private:
+    void handleChangeStringRequest(
+        const std::shared_ptr<beginner_tutorials::srv::ChangeString::Request>
+            request,
+        std::shared_ptr<beginner_tutorials::srv::ChangeString::Response>
+            response) {
+        base_string_ = request->new_string;
+        response->success = true;
+        RCLCPP_WARN_STREAM(this->get_logger(),
+            "Base string changed to: " << base_string_);
+    }
+
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+    rclcpp::Service<beginner_tutorials::srv::ChangeString>::SharedPtr service_;
+    std::string base_string_;
+};
+
 int main(int argc, char **argv) {
-    // Initialize ROS 2
     rclcpp::init(argc, argv);
+    auto node = std::make_shared<Talker>();
 
-    // Create a node
-    auto node = rclcpp::Node::make_shared("listener");
+    rclcpp::Rate rate(1);  // 1 Hz
+    while (rclcpp::ok()) {
+        node->publishMessage();
+        rclcpp::spin_some(node);
+        rate.sleep();
+    }
 
-    // Create a subscriber
-    auto chatter_sub = node->create_subscription<std_msgs::msg::String>(
-        "chatter", 10, chatterCallback);
-
-    // Spin to handle incoming messages
-    rclcpp::spin(node);
-
-    // Shutdown ROS 2
     rclcpp::shutdown();
-
     return 0;
 }

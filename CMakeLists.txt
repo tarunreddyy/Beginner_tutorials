@@ -9,15 +9,30 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+
+# Declare service files
+set(srv_files
+  "srv/ChangeString.srv"
+)
 
 # Declare a C++ executable
 add_executable(talker src/talker.cpp)
 add_executable(listener src/listener.cpp)
 
-# Specify libraries to link a library or executable target against
+# Generate and link against the ROS interface packages
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${srv_files}
+  DEPENDENCIES std_msgs builtin_interfaces
+)
+
+rosidl_get_typesupport_target(cpp_ts_lib ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(talker ${cpp_ts_lib})
+target_link_libraries(listener ${cpp_ts_lib})
+
+# Link against the ROS interface packages
 ament_target_dependencies(talker rclcpp std_msgs)
 ament_target_dependencies(listener rclcpp std_msgs)
-
 
 # Install targets
 install(TARGETS
@@ -28,12 +43,7 @@ install(TARGETS
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
