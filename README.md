@@ -50,6 +50,11 @@ This package is part of a series of tutorials for learning ROS 2, the Robot Oper
    ros2 run beginner_tutorials listener
    ```
 
+* Run the `listener` node with debugger:
+   ```bash
+   ros2 run beginner_tutorials listener --ros-args --log-level debug
+   ```
+
 You should see messages printed to the terminal indicating that the `talker` node is publishing messages to the `chatter` topic.
 
 ## License

@@ -31,8 +31,8 @@ class Talker : public rclcpp::Node {
         publisher_ = this->create_publisher<std_msgs::msg::String>(
                     "chatter", 10);
         service_ = this->create_service<beginner_tutorials::srv::ChangeString>(
-            "change_string",
-            std::bind(&Talker::handleChangeStringRequest, this,
+                    "change_string",
+                    std::bind(&Talker::handleChangeStringRequest, this,
                     std::placeholders::_1, std::placeholders::_2));
         RCLCPP_INFO_STREAM(this->get_logger(),
                     "Talker node initialized with base string: "
@@ -44,6 +44,11 @@ class Talker : public rclcpp::Node {
      * @details This function publishes the base_string_ as a message to the "chatter" topic.
      */
     void publishMessage() {
+        if (base_string_.empty()) {
+            RCLCPP_FATAL(this->get_logger(),
+            "Base string is empty. Cannot publish an empty message.");
+            return;
+        }
         auto message = std_msgs::msg::String();
         message.data = base_string_;
         RCLCPP_DEBUG(this->get_logger(), "Publishing: '%s'",
@@ -62,6 +67,12 @@ class Talker : public rclcpp::Node {
                     request, std::shared_ptr
                     <beginner_tutorials::srv::ChangeString::Response>
                     response) {
+        if (request->new_string.empty()) {
+            RCLCPP_ERROR(this->get_logger(),
+                        "Received an empty string");
+            response->success = false;
+            return;
+        }
         base_string_ = request->new_string;
         response->success = true;
         RCLCPP_WARN_STREAM(this->get_logger(),

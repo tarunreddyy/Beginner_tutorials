@@ -15,11 +15,19 @@ from launch_ros.actions import Node
 # @return A LaunchDescription object containing the configurations for the nodes to be launched.
 def generate_launch_description():
     return launch.LaunchDescription([
+        DeclareLaunchArgument(
+            'publish_frequency',
+            default_value='1',
+            description='Frequency of talker node publishing to /chatter topic'
+        ),
         ## Node initialization for the 'talker' node.
         Node(
             package='beginner_tutorials',     #< Name of the package containing the node.
             executable='talker',              #< Name of the node's executable.
             name='talker_node'                #< Name to be assigned to the initialized node.
+            parameters=[
+                {'publish_frequency': LaunchConfiguration('publish_frequency')}
+            ]
         ),
         ## Node initialization for the 'listener' node.
         Node(
