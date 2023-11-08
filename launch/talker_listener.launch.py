@@ -1,38 +1,37 @@
-## @file
-# @brief Launch file for initializing and running the talker and listener ROS nodes.
-# @author Tarun Trilokesh
-# @date 10/29/2023
-# @version 1.0
-
-import launch
+from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
+from launch.substitutions import LaunchConfiguration, Command
 
-## @brief Function to generate the launch description for the talker and listener nodes.
-#
-# This function initializes the 'talker' and 'listener' nodes from the 'beginner_tutorials' package 
-# and sets them up to be executed.
-# 
-# @return A LaunchDescription object containing the configurations for the nodes to be launched.
 def generate_launch_description():
-    return launch.LaunchDescription([
+    return LaunchDescription([
         DeclareLaunchArgument(
-            'publish_frequency',
-            default_value='1',
-            description='Frequency of talker node publishing to /chatter topic'
+            'new_string',
+            default_value='Hello World!',  # Provide a sensible default
+            description='New string to send to the change_string service.'
         ),
-        ## Node initialization for the 'talker' node.
         Node(
-            package='beginner_tutorials',     #< Name of the package containing the node.
-            executable='talker',              #< Name of the node's executable.
-            name='talker_node'                #< Name to be assigned to the initialized node.
-            parameters=[
-                {'publish_frequency': LaunchConfiguration('publish_frequency')}
+            package='beginner_tutorials',
+            executable='talker',
+            name='talker_node',
+            # Additional configurations for the talker node...
+        ),
+        Node(
+            package='beginner_tutorials',
+            executable='listener',
+            name='listener_node',
+            # Additional configurations for the listener node...
+        ),
+        TimerAction(
+            period=5.0,
+            actions=[
+                ExecuteProcess(
+                    cmd=[
+                        'ros2', 'run', 'beginner_tutorials', 'change_string_client', 
+                        LaunchConfiguration('new_string')
+                    ],
+                    name='change_string_client_node',
+                )
             ]
         ),
-        ## Node initialization for the 'listener' node.
-        Node(
-            package='beginner_tutorials',     #< Name of the package containing the node.
-            executable='listener',            #< Name of the node's executable.
-            name='listener_node'              #< Name to be assigned to the initialized node.
-        )
     ])
