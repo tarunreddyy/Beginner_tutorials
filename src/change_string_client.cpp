@@ -1,3 +1,5 @@
+// Copyright 2023 Tarun Trilokesh
+
 /**
  * @file change_string_client.cpp
  * @author Tarun Trilokesh
@@ -21,38 +23,43 @@
  * the message string being published by the 'talker' node.
  */
 class ChangeStringClient : public rclcpp::Node {
-public:
+ public:
   /**
    * @brief Constructor for ChangeStringClient
    * @param service_name The name of the change_string service provided by the 'talker' node.
    */
-  explicit ChangeStringClient(const std::string & service_name)
+  explicit ChangeStringClient(const std::string &service_name)
   : Node("change_string_client") {
-    client_ = this->create_client<beginner_tutorials::srv::ChangeString>(service_name);
+    client_ = this->create_client<
+        beginner_tutorials::srv::ChangeString>(service_name);
   }
 
   /**
    * @brief Send a request to change the published string
    * @param new_string The new string to be published by the 'talker' node
    */
-  void send_request(const std::string & new_string) {
-    auto request = std::make_shared<beginner_tutorials::srv::ChangeString::Request>();
+  void send_request(const std::string &new_string) {
+    auto request = std::make_shared<
+        beginner_tutorials::srv::ChangeString::Request>();
     request->new_string = new_string;
 
     // Wait for the service to be available
     while (!client_->wait_for_service(std::chrono::seconds(1))) {
       if (!rclcpp::ok()) {
-        RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+        RCLCPP_ERROR(this->get_logger(),
+                    "Interrupted while waiting for the service. Exiting.");
         return;
       }
-      RCLCPP_INFO(this->get_logger(), "Service not available, waiting again...");
+      RCLCPP_INFO(this->get_logger(),
+                  "Service not available, waiting again...");
     }
 
     // Send the request asynchronously
     auto result = client_->async_send_request(request);
-    
+
     // Wait for the result
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+    if (rclcpp::spin_until_future_complete(
+        this->get_node_base_interface(), result) ==
         rclcpp::FutureReturnCode::SUCCESS) {
       RCLCPP_INFO(this->get_logger(), "Service call succeeded");
     } else {
@@ -60,7 +67,7 @@ public:
     }
   }
 
-private:
+ private:
   ///< Client object for the change_string service
   rclcpp::Client<beginner_tutorials::srv::ChangeString>::SharedPtr client_;
 };
@@ -77,7 +84,8 @@ int main(int argc, char **argv) {
 
     // Check command-line arguments for the new string
     if (argc != 2) {
-        RCLCPP_ERROR(node->get_logger(), "Usage: change_string_client new_string");
+        RCLCPP_ERROR(node->get_logger(),
+                     "Usage: change_string_client new_string");
         return 1;
     }
     std::string new_string = argv[1];
