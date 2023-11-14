@@ -2,59 +2,70 @@
 
 /**
  * @file listener.cpp
+ * @brief Listener node for ROS2 beginner tutorials.
  * @author Tarun Trilokesh
- * @date 10/27/2023
- * @version 1.0
- *
- * @brief Main entry point for the beginner_tutorials subscriber node.
- *
- * This program initializes a ROS 2 node, creates a subscriber,
- * and subscribes to the "chatter" topic to receive string messages.
+ * @date 11/07/2023
+ * @version 2.0
  */
 
+// Required includes
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
 /**
- * @brief Callback function to handle received messages.
+ * @class Listener
+ * @brief ROS2 subscriber node for the "chatter" topic.
  * 
- * This function is called whenever a new message is received on
- * the "chatter" topic. It simply prints the message to the console.
- * 
- * @param msg The received message.
+ * The Listener class defines a ROS2 node that subscribes to the "chatter" topic
+ * and prints the received messages to the console.
  */
-void chatterCallback(const std_msgs::msg::String::SharedPtr msg) {
-    RCLCPP_INFO(rclcpp::get_logger("listener"), "I heard: '%s'",
-                msg->data.c_str());
-}
+class Listener : public rclcpp::Node {
+ public:
+    /**
+     * @brief Construct a new Listener node.
+     * 
+     * This constructor initializes the ROS2 node and creates a subscription
+     * to the "chatter" topic.
+     */
+    Listener() : Node("listener") {
+        subscriber_ = this->create_subscription<std_msgs::msg::String>(
+            "chatter", 10,
+            std::bind(&Listener::messageCallback, this, std::placeholders::_1));
+    }
+
+ private:
+    /**
+     * @brief Callback function for received messages.
+     * 
+     * This function is called whenever a new message is received on the
+     * "chatter" topic. It prints the message content to the console.
+     * 
+     * @param msg The received message.
+     */
+    void messageCallback(const std_msgs::msg::String::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
+    }
+
+    ///< Subscriber for the "chatter" topic.
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
+};
 
 /**
- * @brief Main function to run the subscriber node.
+ * @brief Main function for the Listener node.
  * 
- * Initializes the ROS 2 node and subscriber. Continuously listens for
- * messages on the "chatter" topic and calls the callback function to
- * handle them.
+ * This function initializes the ROS2 system, creates a Listener node,
+ * and spins the node to keep it running.
  * 
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int - Returns 0 on successful execution.
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line arguments.
+ * @return int Execution status.
  */
 int main(int argc, char **argv) {
-    // Initialize ROS 2
     rclcpp::init(argc, argv);
+    auto node = std::make_shared<Listener>();
 
-    // Create a node
-    auto node = rclcpp::Node::make_shared("listener");
-
-    // Create a subscriber
-    auto chatter_sub = node->create_subscription<std_msgs::msg::String>(
-        "chatter", 10, chatterCallback);
-
-    // Spin to handle incoming messages
     rclcpp::spin(node);
 
-    // Shutdown ROS 2
     rclcpp::shutdown();
-
     return 0;
 }
