@@ -73,7 +73,7 @@ source install/setup.bash
 
 ## Running Nodes Using a Launch File
 
-Launch files in ROS 2 are used to start multiple nodes with specific configurations. This package includes a launch file that initializes the `talker` and `listener` nodes and records ROS 2 bag files.
+Launch files in ROS 2 are used to start multiple nodes with specific configurations. This package includes a launch file that initializes the `talker` node and records ROS 2 bag files.
 
 - To start nodes with bag recording enabled (records for ~15 seconds):
 
@@ -95,7 +95,7 @@ Launch files in ROS 2 are used to start multiple nodes with specific configurati
      ros2 run beginner_tutorials listener
      ```
 
-  2. Play the bag file in another terminal:
+  2. Navigate to the output_bag directory and play the bag file in another terminal:
 
      ```bash
      ros2 bag play output_bag_0.db3

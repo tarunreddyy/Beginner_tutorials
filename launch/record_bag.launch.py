@@ -30,37 +30,32 @@ from launch_ros.actions import Node
 import os
 
 def generate_launch_description():
-    # Declare the output directory for the bag files
     output_bag_directory = os.path.join(os.getcwd(), 'output_bag')
 
     return LaunchDescription([
-        # Declare launch argument for bag recording
         DeclareLaunchArgument(
             'record_bag',
             default_value='false',
             description='Enable or disable bag recording.'
         ),
 
-        # Conditionally start bag recording based on the record_bag argument
         ExecuteProcess(
             condition=IfCondition(LaunchConfiguration('record_bag')),
             cmd=['ros2', 'bag', 'record', '-a', '-o', output_bag_directory],
             output='screen'
         ),
 
-        # Listener node
         Node(
             package='beginner_tutorials',
-            executable='listener',
-            name='listener_node',
+            executable='talker',
+            name='talker_node',
         ),
 
-        # Stop bag recording after 15 seconds
         TimerAction(
             period=15.0,
             actions=[
                 ExecuteProcess(
-                    condition=LaunchConfiguration('record_bag'),
+                    condition=IfCondition(LaunchConfiguration('record_bag')),
                     cmd=['pkill', '-f', 'ros2 bag record'],
                     output='screen'
                 )
