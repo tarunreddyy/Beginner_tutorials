@@ -11,6 +11,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_runtime REQUIRED)
+find_package(tf2_ros REQUIRED)  # Added for TF2 support
+find_package(tf2_geometry_msgs REQUIRED)  # Added for TF2 geometry messages
 
 # Declare service files
 set(srv_files
@@ -28,7 +30,7 @@ add_executable(talker src/talker.cpp)
 add_executable(listener src/listener.cpp)
 add_executable(change_string_client src/change_string_client.cpp)
 
-ament_target_dependencies(talker rclcpp std_msgs)
+ament_target_dependencies(talker rclcpp std_msgs tf2_ros tf2_geometry_msgs)
 ament_target_dependencies(listener rclcpp std_msgs)
 ament_target_dependencies(change_string_client rclcpp std_msgs)
 
@@ -54,8 +56,33 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
+
+  # un-comment the following lines skip linters (TRUE = skip that test)
+  # set(ament_cmake_cppcheck_FOUND TRUE)
+  set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)
+  set(ament_cmake_pep257_FOUND TRUE)
+  # set(ament_cmake_xmllint_FOUND TRUE)
+  set(ament_cmake_uncrustify_FOUND TRUE)
+  # set(ament_cmake_lint_cmake_FOUND TRUE)
+
+  add_custom_target(
+    cpplint_custom
+    COMMAND cpplint --filter=-build/include_order --recursive ${CMAKE_SOURCE_DIR}/src
+    COMMENT "Running cpplint with custom filters"
+  )
+
+  # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
+
+  # Add a gtest executable
+  set(TESTFILES
+    test/test_talker.cpp)
+  ament_add_gtest(test_talker ${TESTFILES})
+  ament_target_dependencies(test_talker rclcpp std_msgs tf2_ros tf2_geometry_msgs rosidl_default_runtime)
 endif()
 
 ament_package()
